@@ -1,0 +1,139 @@
+--Desafio 1
+UPDATE DEBITOS 
+SET situacao_debito = 'Atrasado'
+WHERE DATAVENCIMENTO < CURRENT_date AND SITUACAO_DEBITO NOT IN ('Negociado', 'Pago')
+
+
+--Desafio 2
+UPDATE DEBITOS 
+SET situacao_debito = 'Pendente'
+WHERE DATAVENCIMENTO >= CURRENT_date AND SITUACAO_DEBITO != 'Pago'
+
+
+--Desafio 3
+----------------------------------------------------------------------------
+
+
+--------Desafio 4
+SELECT nome, email, telefone FROM PESSOA p 
+
+
+--------Desafio 5
+SELECT preco_unitario
+FROM PRODUTO p  
+WHERE preco_unitario > 100
+
+
+--------Desafio 6
+SELECT data_venda
+FROM venda 
+WHERE DATA_VENDA BETWEEN '2023-10-07' AND '2023-11-18'
+
+
+--------Desafio 7
+UPDATE PRODUTO p
+SET QUANTIDADE_ESTOQUE = 0
+WHERE p.id_produto = 50
+
+SELECT p.NOME 
+      , p.data_nascimento
+      , p2.quantidade_estoque
+      ,(EXTRACT (YEAR FROM CURRENT_date ) - EXTRACT (YEAR FROM p.data_nascimento)) AS idade
+      FROM PESSOA p 
+      INNER JOIN FORNECEDOR f ON f.ID_PESSOA  = p.ID_PESSOA 
+      LEFT JOIN PRODUTO p2 ON p2.ID_FORNECEDOR = f.ID_FORNECEDOR 
+      WHERE quantidade_estoque  = 0
+ 
+ 
+--------Desafio 8
+SELECT p.nome
+      ,d.SITUACAO_DEBITO 
+      ,c.id_cliente
+      FROM pessoa p
+      LEFT JOIN CLIENTE c ON c.ID_CLIENTE = p.ID_PESSOA 
+      INNER JOIN DEBITOS d ON d.ID_CLIENTE = c.ID_CLIENTE 
+
+      
+--------Desafio 10
+      
+      
+-------------------------------------------------------------
+      
+      
+--------Desafio 11
+SELECT * FROM PRODUTO 
+
+UPDATE produto 
+SET preco_unitario = (preco_unitario * 1.10)
+WHERE QUANTIDADE_ESTOQUE < 10
+
+
+--Desafio 13
+SELECT * FROM DEBITOS d 
+SELECT * FROM PAGAMENTO p 
+UPDATE DEBITOS 
+SET situacao_debito = 'Pago'
+WHERE SITUACAO_DEBITO =	'Atrasado' 
+AND ID_DEBITO IN ( 
+    SELECT id_debito 
+    FROM pagamento 
+)
+
+
+--desafio 15
+SELECT data_venda
+FROM venda 
+WHERE DATA_VENDA BETWEEN '2023-12-01' AND '2024-01-01'
+
+
+--Desafio 16
+SELECT QUANTIDADE_ESTOQUE 
+FROM PRODUTO p 
+WHERE QUANTIDADE_ESTOQUE BETWEEN 5 AND 20
+
+
+--Desafio 17
+SELECT NOME 
+FROM pessoa 
+WHERE nome LIKE 'A%' 
+
+
+--Desafio 18
+SELECT p.nome
+FROM PRODUTO p 
+WHERE ID_PRODUTO NOT IN (SELECT ID_PRODUTO FROM ITENSVENDA i)
+
+
+--Desafio 19
+SELECT p.nome
+FROM VENDA v 
+INNER JOIN PESSOA p2  ON p2.ID_PESSOA = v.id_pessoa
+INNER JOIN ITENSVENDA i  ON i.ID_VENDA = v.ID_VENDA 
+INNER JOIN PRODUTO p  ON p.ID_PRODUTO = i.ID_PRODUTO 
+WHERE p2.nome IN ('Carla Souza', 'Larissa Ferreira')
+
+
+--Desafio 20
+
+--Desafio 21
+--Desafio 22
+--Desafio 23
+--Desafio 24
+--Desafio 25
+---------------------------
+SELECT * FROM PRODUTO p 
+
+SELECT descricao, avg(preco_unitario) AS preco_medio  
+FROM PRODUTO p 
+GROUP BY descricao 
+HAVING AVG(preco_unitario) > 
+
+
+
+
+--
+SELECT FIRST 10 VENDA.* 
+FROM VENDA v 
+ORDER BY VALOR_TOTAL  DESC 
+ 
+
