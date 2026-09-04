@@ -11,26 +11,28 @@ WHERE DATAVENCIMENTO >= CURRENT_date AND SITUACAO_DEBITO != 'Pago'
 
 
 --Desafio 3
-----------------------------------------------------------------------------
+UPDATE DEBITOS
+SET datavencimento = (EXTRACT(YEAR FROM DATAVENCIMENTO )) -5 
+WHERE SITUACAO_DEBITO = 'Negociado'
 
 
---------Desafio 4
+--Desafio 4
 SELECT nome, email, telefone FROM PESSOA p 
 
 
---------Desafio 5
+--Desafio 5
 SELECT preco_unitario
 FROM PRODUTO p  
 WHERE preco_unitario > 100
 
 
---------Desafio 6
+--Desafio 6
 SELECT data_venda
 FROM venda 
 WHERE DATA_VENDA BETWEEN '2023-10-07' AND '2023-11-18'
 
 
---------Desafio 7
+--Desafio 7
 UPDATE PRODUTO p
 SET QUANTIDADE_ESTOQUE = 0
 WHERE p.id_produto = 50
@@ -45,7 +47,7 @@ SELECT p.NOME
       WHERE quantidade_estoque  = 0
  
  
---------Desafio 8
+--Desafio 8
 SELECT p.nome
       ,d.SITUACAO_DEBITO 
       ,c.id_cliente
@@ -54,13 +56,14 @@ SELECT p.nome
       INNER JOIN DEBITOS d ON d.ID_CLIENTE = c.ID_CLIENTE 
 
       
---------Desafio 10
+--Desafio 10
+SELECT FIRST 10
       
       
 -------------------------------------------------------------
       
       
---------Desafio 11
+--Desafio 11
 SELECT * FROM PRODUTO 
 
 UPDATE produto 
@@ -114,24 +117,147 @@ WHERE p2.nome IN ('Carla Souza', 'Larissa Ferreira')
 
 
 --Desafio 20
+SELECT cast('Fornecedor'AS varchar(20)) AS tipo,
+pessoa.NOME
+FROM pessoa
+INNER JOIN FORNECEDOR f ON f.ID_PESSOA  = pessoa.ID_PESSOA
+UNION
+SELECT cast('Cliente' AS varchar(20)) AS tipo,
+pessoa.NOME
+FROM pessoa
+INNER JOIN cliente c ON c.ID_PESSOA  = pessoa.ID_PESSOA
+ORDER BY  2
 
 --Desafio 21
+SELECT p.nome
+  ,c.cpf
+  ,f.DESCRICAO
+FROM venda v
+INNER JOIN PESSOA p ON p.ID_PESSOA = v.ID_PESSOA
+INNER JOIN CLIENTE c ON c.ID_PESSOA = p.ID_PESSOA
+INNER JOIN FORMA_PAGAMENTO f ON f.ID_FORMA_PAGAMENTO = v.ID_FORMA_PAGAMENTO
+
 --Desafio 22
+SELECT p.*
+FROM VENDA v 
+INNER  JOIN ITENSVENDA i ON i.ID_VENDA = v.ID_VENDA 
+INNER JOIN produto p ON p.ID_PRODUTO = i.ID_ITEM_VENDA 
+WHERE p.nome LIKE 'Mesa Digitalizadora%'
+
 --Desafio 23
+SELECT cast('Fornecedor'AS varchar(20)) AS tipo,
+p.nome,
+       (2025 - EXTRACT(YEAR FROM p.data_nascimento)) AS idade
+FROM pessoa p, fornecedor f
+WHERE p.id_pessoa = f.id_pessoa
+UNION
+SELECT cast('Cliente' AS varchar(20)) AS tipo,
+p.nome,
+       (2025 - EXTRACT(YEAR FROM p.data_nascimento)) AS idade
+FROM pessoa p, cliente c
+WHERE p.id_pessoa = c.id_pessoa
+ORDER BY  2
+
 --Desafio 24
+SELECT l.nome, b.nome, e.id_pessoa
+FROM logradouro l
+LEFT JOIN bairro b ON b.id_bairro = l.id_bairro
+LEFT JOIN endereco e ON e.id_logradouro = l.id_logradouro
+
 --Desafio 25
----------------------------
-SELECT * FROM PRODUTO p 
+SELECT *
+FROM produto
+WHERE preco_unitario > (
+    SELECT AVG(preco_unitario)
+    FROM produto
+)
 
-SELECT descricao, avg(preco_unitario) AS preco_medio  
-FROM PRODUTO p 
-GROUP BY descricao 
-HAVING AVG(preco_unitario) > 
+--Desafio 26
+SELECT 
+	p.nome
+	,e.id_municipio
+	,m.populacao
+FROM venda v 
+INNER JOIN pessoa p ON p.ID_PESSOA = v.ID_PESSOA 
+INNER JOIN ENDERECO e ON e.ID_PESSOA = p.ID_PESSOA
+INNER JOIN MUNICIPIO m ON m.ID_MUNICIPIO = e.ID_MUNICIPIO 
+WHERE m.POPULACAO > 1000000;
+
+--Desafio 27
+SELECT p.nome, SUM(i.quantidade) AS quantidade_vendida
+FROM pessoa p, fornecedor f, produto pr, itensvenda i
+WHERE p.id_pessoa = f.id_pessoa
+AND f.id_fornecedor = pr.id_fornecedor
+AND pr.id_produto = i.id_produto
+GROUP BY p.nome
+
+--Desafio 28
+SELECT p.nome, v.valor_total
+FROM pessoa p
+INNER JOIN cliente c ON c.id_pessoa = p.id_pessoa
+INNER JOIN venda v ON v.id_pessoa = p.id_pessoa
+WHERE v.valor_total > 500
+
+--Desafio 29
+SELECT p.nome AS pessoa
+	,l.nome AS logradouro
+	,b.nome AS bairro
+	,e.numero
+FROM ENDERECO e  
+LEFT JOIN PESSOA p ON p.ID_PESSOA = e.ID_PESSOA
+LEFT JOIN logradouro l ON l.ID_LOGRADOURO  = e.ID_LOGRADOURO
+LEFT JOIN BAIRRO b ON B.ID_BAIRRO  = e.ID_BAIRRO
+
+--Desafio 30
+SELECT pr.nome, pr.preco_unitario, p.nome
+FROM produto pr
+LEFT JOIN fornecedor f ON f.id_fornecedor = pr.id_fornecedor
+LEFT JOIN pessoa p ON p.id_pessoa = f.id_pessoa
+
+--Desafio 31
+SELECT *
+FROM produto
+ORDER BY quantidade_estoque DESC
+
+--Desafio 32
+SELECT * FROM venda
+ORDER BY valor_total ASC
+
+--Desafio 33
+SELECT * FROM produto
+WHERE quantidade_estoque < (
+    SELECT AVG(quantidade_estoque)
+    FROM produto
+)
+
+--Desafio 34
+SELECT p.nome
+	,p.telefone
+FROM pessoa p
+WHERE p.TELEFONE IN (SELECT telefone FROM PESSOA
+					GROUP BY telefone
+					HAVING COUNT(telefone) > 1)
+
+--Desafio 35
+UPDATE PRODUTO p SET PRECO_UNITARIO = PRECO_UNITARIO  + (PRECO_UNITARIO  * 0.10)
+WHERE p.ID_FORNECEDOR  IN (SELECT f.ID_FORNECEDOR  FROM FORNECEDOR f
+INNER JOIN PESSOA pe ON pe.ID_PESSOA = f.ID_PESSOA
+INNER JOIN ENDERECO e ON e.ID_PESSOA = pe.ID_PESSOA
+INNER JOIN MUNICIPIO m ON m.ID_MUNICIPIO = e.ID_MUNICIPIO
+WHERE m.nome = 'Brasília')
+
+--Desafio 36
+SELECT v.* FROM venda v
+INNER JOIN pagamento pg ON pg.id_venda = v.id_venda
+INNER JOIN debitos d ON d.id_debito = pg.id_debito
+WHERE d.situacao_debito = 'Negociado'
 
 
 
 
---
+
+-- Comando FIRST
+
 SELECT FIRST 10 VENDA.* 
 FROM VENDA v 
 ORDER BY VALOR_TOTAL  DESC 
